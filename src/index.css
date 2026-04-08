@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+@theme {
+  --color-arca-blue: #0052CC;
+  --color-arca-dark: #172B4D;
+  --color-arca-gray: #42526E;
+  --color-arca-bg: #FFFFFF;
+  --color-arca-subtle: #F4F5F7;
+  --color-arca-border: #DFE1E6;
+  --color-arca-hover: #0747A6;
+}
