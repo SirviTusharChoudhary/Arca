@@ -41,6 +41,16 @@ const Dashboard = () => {
         fetchUser();
     }, [uid])
 
+    if (loading) {
+        return (
+        <div style={{ background: 'blue', color: 'white', height: '100vh', padding: '50px' }}>
+          <h1>Dashboard is reaching the return statement!</h1>
+          <p>User UID from URL: {uid}</p>
+          <p>User Data status: {userData ? "Loaded" : "Not Loaded"}</p>
+        </div>
+      );
+    } 
+
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 text-slate-900">
       
@@ -64,13 +74,12 @@ const Dashboard = () => {
           <button className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">
             <Zap size={18} />
           </button>
-            {userData.photoURL}
           <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white border-2 border-white ring-1 ring-gray-200">TS</div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex flex-1 p-6 lg:p-10 gap-10">
+      <main className="flex flex-1 p-2 lg:p-10 gap-10">
         
         {/* Left Section (Main Dashboard) */}
         <div className="flex-1 flex flex-col gap-10">
@@ -101,7 +110,7 @@ const Dashboard = () => {
                 >
                   {tab}
                   {index === 0 && <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">{assignedTasks.length}</span>}
-                </button>
+                </button>       
               ))}
             </div>
 

@@ -3,11 +3,13 @@ import { Eye, EyeOff, User, Mail, Lock, Sparkles, AtSign, X, ArrowRight } from "
 import { motion } from "framer-motion";
 import { auth, db } from "../services/firebase";
 import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const provider = new GoogleAuthProvider();
 const Signup = ({ swap, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const nav = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
