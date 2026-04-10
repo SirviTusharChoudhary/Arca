@@ -7,6 +7,7 @@ import CreateProject from "../components/CreateProject";
 import ProjectList from "../components/ProjectList";
 import AccessDenied from "../components/AccessDenied";
 import { useAuth } from '../context/AuthContext.jsx'
+import Navbar from "../components/Navbar.jsx";
 
 const Dashboard = () => {
   const { uid } = useParams();
@@ -98,32 +99,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-[#F4F5F7] text-slate-900">
       {/* 1. Global Navigation */}
-      <header className="flex items-center justify-between h-14 px-6 bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <div className="font-bold text-xl text-blue-600 tracking-tight">
-            Arca
-          </div>
-          {/* <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-gray-600">
-            <a href="#" className="px-3 py-1 bg-blue-50 text-blue-700 rounded">Dashboards</a>
-            <a href="#" className="hover:text-blue-600">Projects</a>
-            <a href="#" className="hover:text-blue-600">People</a>
-          </nav> */}
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search projects..."
-              className="w-64 h-9 pl-9 pr-3 text-sm bg-gray-50 border border-gray-200 rounded-md focus:bg-white focus:border-blue-500 outline-none transition-all"
-            />
-          </div>
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
-            JD
-          </div>
-        </div>
-      </header>
+      <Navbar userData={userData}/>
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-10">
         {/* 2. Header Section */}

@@ -1,7 +1,9 @@
 import React from "react";
 import { MoreVertical, Users, LayoutGrid } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ProjectList = ({ projects, isAdminUid }) => {
+  const nav = useNavigate();
   if (!projects || projects.length === 0) {
     return (
       <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl bg-white">
@@ -18,6 +20,7 @@ const ProjectList = ({ projects, isAdminUid }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.map((project) => (
         <div
+          onClick={() => nav(`/project/${project.projectId}`)}
           key={project.projectId}
           className="group bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col gap-4"
         >

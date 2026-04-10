@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, Sparkles, AtSign, X, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { auth, db } from "../services/firebase";
-import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
 import { setDoc, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -56,10 +56,7 @@ const Signup = ({ swap, onClose }) => {
   };
 
   const generateHandle = (email, uid) => {
-    const prefix = email
-      .split("@")[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
+    const prefix = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "").substring(0,20);
     const shortId = uid.slice(-4);
     return `${prefix}_${shortId}`;
   };
@@ -80,6 +77,9 @@ const Signup = ({ swap, onClose }) => {
           joinedProjects: [],
           preferences: {},
         };
+        await updateProfile((user), {
+          displayName : formData.name,
+        })
         await setDoc(doc(db, "users", user.uid), userData);
         setLoading(false);
         const savedPath = sessionStorage.getItem("redirectPath");
@@ -132,6 +132,8 @@ const Signup = ({ swap, onClose }) => {
                 <input
                   type="text"
                   required
+                  minLength={4}
+                  maxLength={20}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
