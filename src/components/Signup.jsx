@@ -32,7 +32,7 @@ const Signup = ({ swap, onClose }) => {
               email: user.email,
               photoURL: user.photoURL,
               username: username,
-              joinedRooms: [],
+              joinedProjects: [],
               preferences: {},
             };
             await setDoc(userRef, userData);
@@ -77,7 +77,7 @@ const Signup = ({ swap, onClose }) => {
           email: user.email,
           photoURL: `https://openclipart.org/detail/346569/default-silhouette-avatar`,
           username: username,
-          joinedRooms: [],
+          joinedProjects: [],
           preferences: {},
         };
         await setDoc(doc(db, "users", user.uid), userData);

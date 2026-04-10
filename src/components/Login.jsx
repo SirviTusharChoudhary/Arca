@@ -36,7 +36,7 @@ const Login = ({swap, onClose}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
+    .then((userCredential) => {
         const savedPath = sessionStorage.getItem("redirectPath");
         if (savedPath) {
             nav(savedPath);
