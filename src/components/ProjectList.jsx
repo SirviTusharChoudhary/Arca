@@ -2,7 +2,7 @@ import React from "react";
 import { MoreVertical, Users, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const ProjectList = ({ projects, isAdminUid }) => {
+const ProjectList = ({ projects, isAdminUid, userData }) => {
   const nav = useNavigate();
   if (!projects || projects.length === 0) {
     return (

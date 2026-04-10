@@ -11,38 +11,30 @@ import Navbar from "../components/Navbar.jsx";
 
 const Dashboard = () => {
   const { uid } = useParams();
-  const { user } = useAuth();
-  const [userData, setUserData] = useState(null);
+  const { user, userData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [joinedProject, setJoinedProject] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-  const userRef = doc(db, "users", uid);
-  const unsub = onSnapshot(
-    userRef,
-    async (userSnap) => {
-      if (userSnap.exists()) {
-        setUserData(userSnap.data());
-        const projIds = userSnap.data().joinedProjects || [];
-        const projObjs = await Promise.all(
-          projIds.map(async (id) => {
-            const projDoc = await getDoc(doc(db, "projects", id));
-            return projDoc.exists() ? projDoc.data() : null;
-          })
-        );
-        setJoinedProject(projObjs.filter((p) => p));
+    const fetchProjects = async () => {
+      if (!userData) {
         setLoading(false);
+        return;
       }
-    },
-    (error) => {
-      console.error(error);
+      const projIds = userData.joinedProjects || [];
+      const projObjs = await Promise.all(
+        projIds.map(async (id) => {
+          const projDoc = await getDoc(doc(db, "projects", id));
+          return projDoc.exists() ? projDoc.data() : null;
+        })
+      );
+      setJoinedProject(projObjs.filter((p) => p));
       setLoading(false);
-    }
-  );
+    };
 
-  return () => unsub();
-}, [uid]);
+    fetchProjects();
+  }, [userData]);
 
   async function addProject(projectName, projectType, projectId, selectedColor) {
     const newProj = {
@@ -77,29 +69,20 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          background: "blue",
-          color: "white",
-          height: "100vh",
-          padding: "50px",
-        }}
-      >
-        <h1>Dashboard is reaching the return statement!</h1>
-        <p>User UID from URL: {uid}</p>
-        <p>User Data status: {userData ? "Loaded" : "Not Loaded"}</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#F4F5F7]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (user.uid != uid) {
+  if (user.uid !== uid) {
     return <AccessDenied/>
   }
 
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-[#F4F5F7] text-slate-900">
       {/* 1. Global Navigation */}
-      <Navbar userData={userData}/>
+      <Navbar text={"Project"}/>
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-10">
         {/* 2. Header Section */}
@@ -117,26 +100,6 @@ const Dashboard = () => {
         </div>
 
         <ProjectList projects={joinedProject} isAdminUid={user.uid}/>
-
-        {/* 4. Secondary Section: Recent Activity / Activity Stream */}
-        {/* <div className="mt-12">
-          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <Clock size={16} />
-            Recent Activity
-          </h2>
-          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-            <div className="p-4 flex items-center gap-4 text-sm">
-               <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-               <span className="text-gray-600">You created task <span className="font-semibold text-slate-900">ARCA-12</span> in <span className="font-semibold text-blue-600">Arca Platform</span></span>
-               <span className="text-gray-400 ml-auto">2 hours ago</span>
-            </div>
-            <div className="p-4 flex items-center gap-4 text-sm">
-               <div className="w-2 h-2 rounded-full bg-green-500"></div>
-               <span className="text-gray-600">Updated room settings for <span className="font-semibold text-blue-600">Design System</span></span>
-               <span className="text-gray-400 ml-auto">Yesterday</span>
-            </div>
-          </div>
-        </div> */}
 
         {modalOpen && <CreateProject isOpen={modalOpen} onClose={() => setModalOpen(false)} addProject={addProject}/>}
       </main>

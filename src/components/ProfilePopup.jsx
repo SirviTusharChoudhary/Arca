@@ -22,7 +22,7 @@ const ProfilePopup = ({ isOpen, onClose, userData, onSignOut }) => {
         </div>
 
         {/* 3. Divider */}
-        <div className="border-t border-gray-100 w-full" />
+        <div className="border-t border-gray-400 w-full" />
 
         {/* Action Section */}
         <div className="p-1.5">

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, Sparkles , X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { auth } from '../services/firebase';
+import { auth, db } from '../services/firebase';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const provider = new GoogleAuthProvider();
 
@@ -15,8 +16,32 @@ const Login = ({swap, onClose}) => {
   const [password, setPassword] = useState('');
   
   const handleGoogleSignIn = async () => {
+      setLoading(true);
       await signInWithPopup(auth, provider)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+            const generateHandle = (email, uid) => {
+                const prefix = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "").substring(0,20);
+                return `${prefix}_${uid.slice(-4)}`;
+            };
+            const username = generateHandle(user.email, user.uid);
+            const userData = {
+              uid: user.uid,
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              username: username,
+              joinedProjects: [],
+              preferences: {},
+            };
+            await setDoc(userRef, userData);
+        }
+        
+        setLoading(false);
         const savedPath = sessionStorage.getItem("redirectPath");
         if (savedPath) {
             nav(savedPath);
@@ -29,12 +54,14 @@ const Login = ({swap, onClose}) => {
     .catch((error) => {
         alert(error);
         console.log("Login" , error);
+        setLoading(false);
     })
     console.log("Google Sign In Triggered");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         const savedPath = sessionStorage.getItem("redirectPath");
@@ -49,6 +76,7 @@ const Login = ({swap, onClose}) => {
     .catch ((error) => {
         alert(error);
         console.log("Login", error);
+        setLoading(false);
     })
     console.log("Logging in with:", { email, password });
   };

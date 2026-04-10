@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Box } from 'lucide-react';
 import ProfilePopup from './ProfilePopup';
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { useAuth } from '../context/AuthContext';
 
-const Navbar = ({ userData }) => {
+const Navbar = ({text}) => {
+  const { userData } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
   const nav = useNavigate();
 
@@ -17,7 +19,15 @@ const Navbar = ({ userData }) => {
   return (
     <header className="flex items-center justify-between h-14 px-6 bg-white border-b border-gray-200 sticky top-0 z-50">
       {/* Left: Branding */}
-      <div className="flex items-center gap-4">
+      <div 
+        className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={() => {
+          if (userData?.uid) {
+            nav(`/dashboard/${userData.uid}`);
+          }
+        }}
+      >
+        <Box className="w-6 h-6 text-blue-600" strokeWidth={1.5} />
         <div className="font-bold text-xl text-blue-600 tracking-tight">
           Arca
         </div>
@@ -29,7 +39,7 @@ const Navbar = ({ userData }) => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="search"
-            placeholder="Search projects..."
+            placeholder={`Search ${text}...`}
             className="w-64 h-9 pl-9 pr-3 text-sm bg-gray-50 border border-gray-200 rounded-md focus:bg-white focus:border-blue-500 outline-none transition-all"
           />
         </div>
