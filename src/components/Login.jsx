@@ -147,7 +147,7 @@ const Login = ({swap, onClose}) => {
               disabled={loading}
               className="w-full bg-arca-blue hover:bg-arca-hover text-white font-bold py-2.5 rounded-[3px] transition-all flex items-center justify-center gap-2 mt-2 shadow-sm disabled:opacity-50"
             >
-              <Sparkles size={16} /> {loading ? "Creating..." : "Create your Arca"}
+              <Sparkles size={16} /> {loading ? "Loading..." : "Login to Arca"}
             </button>
           </form>
 
