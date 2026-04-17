@@ -27,6 +27,7 @@ const CreateTask = ({ projData, roomId, onClose }) => {
         projectId: projectid,
         assignedTo: assignedTo,
         status: "To Do",
+        starred: false,
         priority: priority,
         projectName: projData.projectName,
         createdAt: serverTimestamp(),

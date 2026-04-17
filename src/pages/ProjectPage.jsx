@@ -1,12 +1,30 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2, CheckCircle2, Star, MoreVertical, UserPlus, Link as LinkIcon } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  CheckCircle2,
+  Star,
+  MoreVertical,
+  UserPlus,
+  Link as LinkIcon,
+} from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { collection, doc, getDoc, onSnapshot, query, where, orderBy, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+  orderBy,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useParams } from "react-router-dom";
 import CreateTask from "../components/CreateTask";
 import PendingInvite from "../components/PendingInvite";
+import TaskList from "../components/TaskList";
 
 const ProjectPage = () => {
   const { userData, user } = useAuth();
@@ -17,6 +35,8 @@ const ProjectPage = () => {
   const [addTaskModalOpen, setAddTaskModelOpen] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [category, setCategory] = useState(1);
+  console.log(category);
 
   useEffect(() => {
     let unsub;
@@ -28,28 +48,53 @@ const ProjectPage = () => {
         setProjData(proj.data());
       }
 
-      const q = query(
-        taskRef,
-        where("assignedTo", "==", userData.uid),
-        where("projectId", "==", projectid),
-        orderBy("createdAt", "desc")
-      );
+      let q;
+      if (category == 0) {
+        q = query(
+          taskRef,
+          where("projectId", "==", projectid),
+          orderBy("createdAt", "desc"),
+        );
+      } else if (category == 1) {
+        q = query(
+          taskRef,
+          where("assignedTo", "==", userData.uid),
+          where("projectId", "==", projectid),
+          where("status", "!=", "Done"),
+          orderBy("createdAt", "desc"),
+        );
+      } else if (category == 2) {
+        q = query(
+          taskRef,
+          where("assignedTo", "==", userData.uid),
+          where("projectId", "==", projectid),
+          where("status", "==", "Done"),
+          orderBy("createdAt", "desc"),
+        );
+      } else if (category == 3) {
+        q = query(
+          taskRef,
+          where("assignedTo", "==", userData.uid),
+          where("projectId", "==", projectid),
+          where("starred", "==", true),
+          orderBy("createdAt", "desc"),
+        );
+      }
       unsub = onSnapshot(q, (data) => {
         const tasks = data.docs.map((ele) => ({
-          id : ele.id,
+          id: ele.id,
           ...ele.data(),
-        }))
+        }));
         setAssignedTasks(tasks);
         setLoading(false);
-      })
-      
+      });
     }
     fetchData();
 
     return () => {
-      if (unsub) unsub(); 
-    }
-  }, [projectid, userData?.uid]);
+      if (unsub) unsub();
+    };
+  }, [projectid, userData?.uid, category]);
 
   async function handleDeleteTask(e, id) {
     e.stopPropagation();
@@ -145,58 +190,33 @@ const ProjectPage = () => {
           <div className="flex flex-col gap-8">
             {/* Tab Navigation */}
             <div className="flex items-center border-b border-gray-200 gap-6 text-sm font-medium text-gray-600">
-              {["Assigned to me", "Worked on", "Starred"].map((tab, index) => (
-                <button
-                  key={tab}
-                  className={`pb-3 border-b-2 transition-colors ${index === 0 ? "border-blue-600 text-blue-700 font-semibold" : "border-transparent hover:text-blue-600 hover:border-gray-300"}`}
-                >
-                  {tab}
-                  {index === 0 && (
-                    <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
-                      {assignedTasks.length}
-                    </span>
-                  )}
-                </button>
-              ))}
+              {["All Task", "Assigned to me", "Worked on", "Starred"].map(
+                (tab, index) => (
+                  <button
+                    key={tab}
+                    onClick={() => setCategory(index)}
+                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-blue-700 font-semibold" : "border-transparent hover:text-blue-600 hover:border-gray-300"}`}
+                  >
+                    {tab}
+                    {index === category && (
+                      <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                        {assignedTasks.length}
+                      </span>
+                    )}
+                  </button>
+                ),
+              )}
             </div>
 
             {/* Task List (Row Based) */}
             <div className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-              {assignedTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer last:border-b-0"
-                >
-                  <CheckCircle2
-                    className={`w-5 h-5 ${task.priority === "High" ? "text-red-500" : "text-gray-400"}`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">
-                      {task.title}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {task.id} • {task.project}
-                    </p>
-                  </div>
-                  <div
-                    className={`px-2 py-0.5 text-xs font-semibold rounded ${task.status === "In Progress" ? "bg-yellow-100 text-yellow-900" : "bg-gray-100 text-gray-800"}`}
-                  >
-                    {task.status}
-                  </div>
-                  <Star className="w-4 h-4 text-gray-300 hover:text-yellow-500 cursor-pointer transition-colors" />
-                  {projData?.admin === user?.uid && (
-                    <button
-                      onClick={(e) => handleDeleteTask(e, task.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
-                      title="Delete Task"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                  <button className="text-gray-400 hover:text-slate-900">
-                    <MoreVertical size={16} />
-                  </button>
-                </div>
+              {assignedTasks?.map((task, index) => (
+                <TaskList
+                  key={index}
+                  task={task}
+                  isAdmin={projData.admin === user.uid}
+                  handleDeleteTask={handleDeleteTask}
+                />
               ))}
             </div>
           </div>
