@@ -80,8 +80,8 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F4F5F7]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
       </div>
     );
   }
@@ -91,26 +91,32 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-screen bg-[#F4F5F7] text-slate-900">
+    <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* 1. Global Navigation */}
       <Navbar text={"Project"} />
 
-      <main className="max-w-7xl mx-auto w-full p-6 lg:p-10">
-        {/* 2. Header Section */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
-            <p className="text-gray-500 text-sm">
+      <main className="max-w-7xl mx-auto w-full p-6 lg:p-10 flex flex-col gap-10">
+        {/* 2. Hero Header */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Your Work</h1>
+            <p className="text-gray-500 dark:text-slate-400 text-sm">
               Manage your rooms and collaborative workspaces.
             </p>
           </div>
-          <button
-            onClick={() => setModalOpen(!modalOpen)}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <Plus size={18} />
-            Create Project
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <button className="hidden sm:flex px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 transition-colors">
+              Go to profile
+            </button>
+            <button
+              onClick={() => setModalOpen(!modalOpen)}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <Plus size={16} />
+              Create project
+            </button>
+          </div>
         </div>
 
         <ProjectList projects={joinedProject} isAdminUid={user.uid} />

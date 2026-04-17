@@ -163,7 +163,7 @@ const ProjectPage = () => {
   if (loading) return <p>LOL WAIT....</p>;
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 text-slate-900">
+    <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* 1. Using our Arca Navbar instead of the old header */}
       <Navbar text={"Task"} />
 
@@ -176,13 +176,13 @@ const ProjectPage = () => {
             {/* Left Side: Project Info & Resource Links */}
             <div className="flex flex-col gap-3">
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
                   {projData.projectName}
                 </h1>
               </div>
 
               {/* Integrated Copy and Team Buttons */}
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={async () => {
                     const inviteLink = `${window.location.origin}/join/${projectid}`;
@@ -190,10 +190,10 @@ const ProjectPage = () => {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className={`flex items-center self-start gap-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border-2 border-dashed rounded-lg transition-all active:scale-95 ${
+                  className={`flex items-center self-start gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all active:scale-95 ${
                     copied
-                      ? "bg-green-50 border-green-200 text-green-600"
-                      : "bg-white border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30"
+                      ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400"
+                      : "bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600"
                   }`}
                 >
                   {copied ? (
@@ -211,7 +211,7 @@ const ProjectPage = () => {
 
                 <button
                   onClick={() => setTeamModalOpen(true)}
-                  className="flex items-center self-start gap-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border-2 border-slate-200 bg-white rounded-lg transition-all hover:bg-slate-50 active:scale-95 text-slate-500 hover:border-slate-300 shadow-sm"
+                  className="flex items-center self-start gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 transition-colors"
                 >
                   <Users size={14} />
                   <span>Team</span>
@@ -225,12 +225,12 @@ const ProjectPage = () => {
                 {/* Pending Invites */}
                 <button
                   onClick={() => setInviteModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 shadow-sm"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 transition-colors"
                 >
                   <div className="relative">
-                    <UserPlus size={18} className="text-slate-500" />
+                    <UserPlus size={16} />
                     {pendingInvites?.length > 0 && (
-                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white animate-pulse" />
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
                     )}
                   </div>
                   <span>Pending Invites</span>
@@ -239,10 +239,10 @@ const ProjectPage = () => {
                 {/* Add Task */}
                 <button
                   onClick={() => setAddTaskModelOpen(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
                 >
-                  <Plus size={18} />
-                  <span>Add Task</span>
+                  <Plus size={16} />
+                  <span>Create Task</span>
                 </button>
               </div>
             )}
@@ -251,17 +251,17 @@ const ProjectPage = () => {
           {/* 3. The "Big Three" Tabs */}
           <div className="flex flex-col gap-8">
             {/* Tab Navigation */}
-            <div className="flex items-center border-b border-slate-200 gap-6 text-sm font-medium text-slate-500">
+            <div className="flex items-center border-b border-gray-200 dark:border-slate-800 gap-6 text-sm font-medium text-gray-600 dark:text-slate-400">
               {["All Tasks", "Assigned to me", "Worked on", "Starred"].map(
                 (tab, index) => (
                   <button
                     key={tab}
                     onClick={() => setCategory(index)}
-                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-slate-900 font-bold" : "border-transparent hover:text-slate-900 hover:border-slate-300"}`}
+                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-blue-700 dark:text-blue-400 font-semibold" : "border-transparent hover:text-blue-600 dark:hover:text-blue-400 hover:border-gray-300 dark:hover:border-slate-600"}`}
                   >
                     {tab}
                     {index === category && (
-                      <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                      <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
                         {assignedTasks.length}
                       </span>
                     )}
@@ -271,7 +271,7 @@ const ProjectPage = () => {
             </div>
 
             {/* Task List (Row Based) */}
-            <div className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
               {assignedTasks?.length > 0 ? (
                 assignedTasks.map((task, index) => (
                   <TaskList

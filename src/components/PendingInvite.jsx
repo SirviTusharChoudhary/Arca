@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Check, UserMinus, ShieldCheck, Clock, Loader2 } from "lucide-react";
+import { X, UserMinus, ShieldCheck, Clock } from "lucide-react";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -37,21 +37,21 @@ const PendingInvite = ({ projData, projectid, onClose, usersMap }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#091E428A] p-4">
-      <div className="bg-white w-full max-w-md rounded shadow-lg border border-[#DFE1E6] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-lg shadow-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#DFE1E6] bg-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <div className="flex items-center gap-2">
-            <Clock className="text-[#0052CC]" size={18} />
-            <h2 className="text-sm font-semibold text-[#172B4D]">
+            <Clock className="text-blue-600 dark:text-blue-400" size={18} />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Access Requests
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-[#42526E] hover:text-[#172B4D] transition-colors"
+            className="text-gray-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -61,19 +61,19 @@ const PendingInvite = ({ projData, projectid, onClose, usersMap }) => {
             localPending.map((uid) => (
               <div
                 key={uid}
-                className="flex items-center justify-between px-6 py-4 border-b border-[#DFE1E6] last:border-0 hover:bg-[#F4F5F7] transition-colors"
+                className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800/60 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   {/* Avatar */}
-                  <div className="w-10 h-10 bg-[#0052CC] text-white rounded-full flex items-center justify-center font-bold text-sm uppercase">
+                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm uppercase">
                     {usersMap[uid]?.name?.charAt(0) || "?"}
                   </div>
 
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-[#172B4D]">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                       {usersMap[uid]?.displayName || "Unknown User"}
                     </span>
-                    <span className="text-[11px] text-[#42526E] font-medium">
+                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">
                       @{usersMap[uid]?.username || "user"} •{" "}
                       {usersMap[uid]?.email}
                     </span>
@@ -83,14 +83,14 @@ const PendingInvite = ({ projData, projectid, onClose, usersMap }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAction(uid, "decline")}
-                    className="p-1.5 text-[#42526E] hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="p-1.5 text-gray-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                     title="Decline"
                   >
                     <UserMinus size={18} />
                   </button>
                   <button
                     onClick={() => handleAction(uid, "accept")}
-                    className="px-3 py-1.5 bg-[#0052CC] text-white text-xs font-medium rounded hover:bg-[#0747A6] transition-colors"
+                    className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Accept
                   </button>
@@ -99,10 +99,10 @@ const PendingInvite = ({ projData, projectid, onClose, usersMap }) => {
             ))
           ) : (
             <div className="py-12 text-center px-6">
-              <div className="w-12 h-12 bg-[#F4F5F7] rounded-full flex items-center justify-center mx-auto mb-3 border border-[#DFE1E6]">
-                <ShieldCheck className="text-[#42526E]" size={24} />
+              <div className="w-12 h-12 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-200 dark:border-slate-700">
+                <ShieldCheck className="text-gray-400 dark:text-slate-500" size={24} />
               </div>
-              <p className="text-sm font-medium text-[#42526E]">
+              <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
                 No pending access requests
               </p>
             </div>

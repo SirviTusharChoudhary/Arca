@@ -42,16 +42,16 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm px-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm px-4">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-lg shadow-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tighter">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
             Create New Task
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-gray-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
           >
             <X size={18} />
           </button>
@@ -61,7 +61,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
           {/* Title Input */}
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
                 Task Title
               </label>
               <input
@@ -70,13 +70,13 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
                 placeholder="What needs to be done?"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
             </div>
 
             {/* Description Input */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
                 Description
               </label>
               <textarea
@@ -84,7 +84,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add more details about this task..."
                 rows={3}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm resize-none"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all text-sm resize-none placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -92,22 +92,22 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
           <div className="grid grid-cols-2 gap-4">
             {/* Priority Menu */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
                 Priority
               </label>
               <div className="relative">
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full appearance-none px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                  className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Urgent">Urgent</option>
+                  <option className="bg-white dark:bg-slate-800" value="Low">Low</option>
+                  <option className="bg-white dark:bg-slate-800" value="Medium">Medium</option>
+                  <option className="bg-white dark:bg-slate-800" value="High">High</option>
+                  <option className="bg-white dark:bg-slate-800" value="Urgent">Urgent</option>
                 </select>
                 <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
                   size={14}
                 />
               </div>
@@ -115,23 +115,23 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
 
             {/* AssignedTo Selection Menu */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
                 Assign Member
               </label>
               <div className="relative">
                 <select
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  className="w-full appearance-none px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                  className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option value={projData?.admin}>
+                  <option className="bg-white dark:bg-slate-800" value={projData?.admin}>
                     {usersMap?.[projData?.admin]?.displayName ||
                       usersMap?.[projData?.admin]?.name ||
                       "Admin"}{" "}
                     (Self)
                   </option>
                   {projData?.members?.map((uid) => (
-                    <option key={uid} value={uid}>
+                    <option className="bg-white dark:bg-slate-800" key={uid} value={uid}>
                       {usersMap?.[uid]?.displayName ||
                         usersMap?.[uid]?.name ||
                         `Member: ${uid.slice(0, 6)}`}
@@ -139,7 +139,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                   ))}
                 </select>
                 <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
                   size={14}
                 />
               </div>
@@ -147,18 +147,18 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
           </div>
 
           {/* Action Footer */}
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-50">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !taskTitle.trim()}
-              className="flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-all active:scale-95"
             >
               {loading ? "Processing..." : "Assign Task"}
             </button>

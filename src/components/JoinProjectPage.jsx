@@ -59,57 +59,57 @@ const JoinProjectPage = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-[#F4F5F7] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#0052CC]" size={32} />
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex items-center justify-center transition-colors">
+        <Loader2 className="animate-spin text-blue-600 dark:text-blue-500" size={32} />
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] flex flex-col items-center justify-center p-6 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 font-sans transition-colors duration-300">
       <div className="w-full max-w-[400px]">
         <Link
           to="/dashboard"
-          className="flex items-center gap-2 text-[#42526E] hover:text-[#0052CC] transition-all mb-6 text-sm font-medium"
+          className="flex items-center gap-2 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all mb-6 text-sm font-medium"
         >
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
 
-        <div className="bg-white border border-[#DFE1E6] rounded p-8 shadow-sm text-center">
-          <div className="w-16 h-16 bg-[#F4F5F7] rounded flex items-center justify-center border border-[#DFE1E6] mx-auto mb-6">
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-8 shadow-sm dark:shadow-xl text-center">
+          <div className="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-gray-200 dark:border-slate-700 mx-auto mb-6">
             {isMember ? (
-              <UserCheck className="text-[#0052CC]" size={32} />
+              <UserCheck className="text-blue-600 dark:text-blue-400" size={32} />
             ) : (
-              <ShieldCheck className="text-[#0052CC]" size={32} />
+              <ShieldCheck className="text-blue-600 dark:text-blue-400" size={32} />
             )}
           </div>
 
-          <h1 className="text-xl font-semibold text-[#172B4D] mb-1 tracking-tight">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1 tracking-tight">
             {project?.projectName}
           </h1>
-          <p className="text-[#42526E] font-mono text-[10px] uppercase tracking-widest mb-8">
+          <p className="text-gray-500 dark:text-slate-400 font-mono text-[10px] uppercase tracking-widest mb-8">
             PROJ-{projectid.slice(0, 6)}
           </p>
 
           <div className="space-y-4">
             {isMember ? (
               <>
-                <p className="text-[#0052CC] text-sm font-medium tracking-tight">
+                <p className="text-blue-600 dark:text-blue-400 text-sm font-medium tracking-tight">
                   You already have access to this project
                 </p>
                 <button
                   onClick={() => navigate(`/project/${projectid}`)}
-                  className="w-full py-2 bg-[#0052CC] text-white text-sm font-medium rounded hover:bg-[#0747A6] transition-colors"
+                  className="w-full py-2 bg-blue-600 dark:bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
                 >
                   View Project
                 </button>
               </>
             ) : requestSent ? (
                <div className="flex flex-col items-center gap-3">
-                 <div className="text-[#172B4D] text-sm font-medium border border-[#DFE1E6] bg-[#F4F5F7] rounded p-4 w-full text-left">
-                   <p className="mb-1 text-[#0052CC] font-semibold">Request Sent 🎉</p>
-                   <p className="font-normal text-[#42526E] text-xs">The project admin has been notified. You'll gain access once they approve.</p>
+                 <div className="text-slate-900 dark:text-slate-100 text-sm font-medium border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 w-full text-left">
+                   <p className="mb-1 text-blue-600 dark:text-blue-400 font-semibold">Request Sent 🎉</p>
+                   <p className="font-normal text-gray-500 dark:text-slate-400 text-xs">The project admin has been notified. You'll gain access once they approve.</p>
                  </div>
-                 <button disabled className="w-full bg-[#091E420F] text-[#42526E] text-sm font-medium py-2 rounded flex items-center justify-center gap-2 cursor-not-allowed">
+                 <button disabled className="w-full bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 text-sm font-medium py-2 rounded-md flex items-center justify-center gap-2 cursor-not-allowed">
                    <UserCheck size={16} />
                    <span>Request Pending...</span>
                  </button>
@@ -118,7 +118,7 @@ const JoinProjectPage = () => {
               <button
                 onClick={handleJoin}
                 disabled={joining}
-                className="w-full bg-[#0052CC] hover:bg-[#0747A6] text-white text-sm font-medium py-2 rounded transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-md transition-colors flex items-center justify-center gap-2"
               >
                 {joining ? (
                   <Loader2 className="animate-spin" size={18} />

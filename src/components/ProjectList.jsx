@@ -6,10 +6,10 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
   const nav = useNavigate();
   if (!projects || projects.length === 0) {
     return (
-      <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl bg-white">
-        <LayoutGrid size={48} className="text-gray-300 mb-4" />
-        <p className="text-gray-900 font-medium">No rooms found</p>
-        <p className="text-gray-500 text-sm">
+      <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 transition-colors">
+        <LayoutGrid size={48} className="text-gray-300 dark:text-slate-600 mb-4" />
+        <p className="text-gray-900 dark:text-slate-100 font-medium">No rooms found</p>
+        <p className="text-gray-500 dark:text-slate-400 text-sm">
           Create a project to get started.
         </p>
       </div>
@@ -22,7 +22,7 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
         <div
           onClick={() => nav(`/project/${project.projectId}`)}
           key={project.projectId}
-          className="group bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col gap-4"
+          className="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-5 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-sm dark:hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4"
         >
           {/* Top Section */}
           <div className="flex justify-between items-start">
@@ -38,17 +38,17 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
 
           {/* Info Section */}
           <div>
-            <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
               {project.projectName}
             </h3>
-            <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest font-bold">
               {project.projectType || "Software"} Room
             </p>
           </div>
 
           {/* Bottom Section */}
-          <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-4">
-            <div className="flex items-center gap-2 text-gray-500">
+          <div className="mt-2 flex items-center justify-between border-t border-gray-50 dark:border-slate-800 pt-4">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
               <Users size={14} />
               <span className="text-xs font-medium">
                 {(project.members?.length || 0) +

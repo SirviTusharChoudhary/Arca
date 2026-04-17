@@ -55,7 +55,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-1.5">
             <Box className="w-8 h-8 text-arca-blue" strokeWidth={1.5} />
-            <span className="text-3xl font-bold tracking-tighter">Arca</span>
+            <span className="text-3xl text-arca-blue font-bold tracking-tighter">Arca</span>
           </motion.div>
           
           <div className="flex items-center gap-7">
