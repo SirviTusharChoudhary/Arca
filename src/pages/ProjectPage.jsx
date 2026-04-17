@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   Plus,
-  Trash2,
   CheckCircle2,
-  Star,
-  MoreVertical,
   UserPlus,
   Link as LinkIcon,
+  Users,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -21,14 +19,16 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import CreateTask from "../components/CreateTask";
 import PendingInvite from "../components/PendingInvite";
 import TaskList from "../components/TaskList";
+import TeamModal from "../components/TeamModal";
 
 const ProjectPage = () => {
   const { userData, user } = useAuth();
   const { projectid } = useParams();
+  const navigate = useNavigate();
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [projData, setProjData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,17 +36,67 @@ const ProjectPage = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [category, setCategory] = useState(1);
-  console.log(category);
+  const [pendingInvites, setPendingInvites] = useState([]);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [usersMap, setUsersMap] = useState({});
 
   useEffect(() => {
-    let unsub;
+    async function fetchUsers() {
+      if (!projData.projectId) return;
+
+      const uids = new Set();
+      if (projData.admin) uids.add(projData.admin);
+      if (projData.members) projData.members.forEach((uid) => uids.add(uid));
+      if (projData.pendingInvite)
+        projData.pendingInvite.forEach((uid) => uids.add(uid));
+
+      const uidsToFetch = Array.from(uids).filter((uid) => !usersMap[uid]);
+
+      if (uidsToFetch.length > 0) {
+        try {
+          const snaps = await Promise.all(
+            uidsToFetch.map((uid) => getDoc(doc(db, "users", uid))),
+          );
+          setUsersMap((prev) => {
+            const newMap = { ...prev };
+            snaps.forEach((snap) => {
+              if (snap.exists()) newMap[snap.id] = snap.data();
+            });
+            return newMap;
+          });
+        } catch (err) {
+          console.error("Failed to fetch users map:", err);
+        }
+      }
+    }
+    fetchUsers();
+  }, [projData.pendingInvite, projData.members, projData.admin]);
+
+  useEffect(() => {
+    let unsubTasks;
+    let unsubProj;
     async function fetchData() {
       const taskRef = collection(db, "tasks");
       const ProjRef = doc(db, "projects", projectid);
-      const proj = await getDoc(ProjRef);
-      if (proj.exists()) {
-        setProjData(proj.data());
-      }
+
+      unsubProj = onSnapshot(ProjRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const isAdmin = data.admin === userData?.uid;
+          const isMember = data.members?.includes(userData?.uid);
+
+          if (!isAdmin && !isMember) {
+            navigate(`/join/${projectid}`, { replace: true });
+            return;
+          }
+
+          setProjData(data);
+          setPendingInvites(data.pendingInvite || []);
+        } else {
+          // If project doesn't exist, kick to dashboard
+          navigate('/dashboard', { replace: true });
+        }
+      });
 
       let q;
       if (category == 0) {
@@ -80,7 +130,7 @@ const ProjectPage = () => {
           orderBy("createdAt", "desc"),
         );
       }
-      unsub = onSnapshot(q, (data) => {
+      unsubTasks = onSnapshot(q, (data) => {
         const tasks = data.docs.map((ele) => ({
           id: ele.id,
           ...ele.data(),
@@ -92,12 +142,14 @@ const ProjectPage = () => {
     fetchData();
 
     return () => {
-      if (unsub) unsub();
+      if (unsubTasks) unsubTasks();
+      if (unsubProj) unsubProj();
     };
   }, [projectid, userData?.uid, category]);
 
   async function handleDeleteTask(e, id) {
     e.stopPropagation();
+    if (projData.admin !== userData?.uid) return;
     if (window.confirm("Are you sure you want to delete this task?")) {
       try {
         await deleteDoc(doc(db, "tasks", id));
@@ -129,32 +181,42 @@ const ProjectPage = () => {
                 </h1>
               </div>
 
-              {/* Integrated Copy Button below project text */}
-              <button
-                onClick={async () => {
-                  const inviteLink = `${window.location.origin}/join/${projectid}`;
-                  await navigator.clipboard.writeText(inviteLink);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-                className={`flex items-center self-start gap-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border-2 border-dashed rounded-lg transition-all active:scale-95 ${
-                  copied
-                    ? "bg-green-50 border-green-200 text-green-600"
-                    : "bg-white border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30"
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <CheckCircle2 size={14} />
-                    <span>Invite Link Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <LinkIcon size={14} />
-                    <span>Copy Invite Link</span>
-                  </>
-                )}
-              </button>
+              {/* Integrated Copy and Team Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    const inviteLink = `${window.location.origin}/join/${projectid}`;
+                    await navigator.clipboard.writeText(inviteLink);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className={`flex items-center self-start gap-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border-2 border-dashed rounded-lg transition-all active:scale-95 ${
+                    copied
+                      ? "bg-green-50 border-green-200 text-green-600"
+                      : "bg-white border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30"
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle2 size={14} />
+                      <span>Invite Link Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon size={14} />
+                      <span>Copy Invite Link</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setTeamModalOpen(true)}
+                  className="flex items-center self-start gap-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border-2 border-slate-200 bg-white rounded-lg transition-all hover:bg-slate-50 active:scale-95 text-slate-500 hover:border-slate-300 shadow-sm"
+                >
+                  <Users size={14} />
+                  <span>Team</span>
+                </button>
+              </div>
             </div>
 
             {/* Right Side: Admin Action Buttons */}
@@ -167,7 +229,7 @@ const ProjectPage = () => {
                 >
                   <div className="relative">
                     <UserPlus size={18} className="text-slate-500" />
-                    {projData?.pendingInvite?.length > 0 && (
+                    {pendingInvites?.length > 0 && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white animate-pulse" />
                     )}
                   </div>
@@ -189,13 +251,13 @@ const ProjectPage = () => {
           {/* 3. The "Big Three" Tabs */}
           <div className="flex flex-col gap-8">
             {/* Tab Navigation */}
-            <div className="flex items-center border-b border-gray-200 gap-6 text-sm font-medium text-gray-600">
-              {["All Task", "Assigned to me", "Worked on", "Starred"].map(
+            <div className="flex items-center border-b border-slate-200 gap-6 text-sm font-medium text-slate-500">
+              {["All Tasks", "Assigned to me", "Worked on", "Starred"].map(
                 (tab, index) => (
                   <button
                     key={tab}
                     onClick={() => setCategory(index)}
-                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-blue-700 font-semibold" : "border-transparent hover:text-blue-600 hover:border-gray-300"}`}
+                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-slate-900 font-bold" : "border-transparent hover:text-slate-900 hover:border-slate-300"}`}
                   >
                     {tab}
                     {index === category && (
@@ -210,37 +272,31 @@ const ProjectPage = () => {
 
             {/* Task List (Row Based) */}
             <div className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-              {assignedTasks?.map((task, index) => (
-                <TaskList
-                  key={index}
-                  task={task}
-                  isAdmin={projData.admin === user.uid}
-                  handleDeleteTask={handleDeleteTask}
-                />
-              ))}
+              {assignedTasks?.length > 0 ? (
+                assignedTasks.map((task, index) => (
+                  <TaskList
+                    key={index}
+                    task={task}
+                    isAdmin={projData.admin === user.uid}
+                    handleDeleteTask={handleDeleteTask}
+                    usersMap={usersMap}
+                  />
+                ))
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center p-12 text-center text-sm font-medium text-slate-500 min-h-[150px]">
+                  No tasks to display in this category.
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* 4. Right Sidebar (Jira Quick Links) */}
-        {/* <aside className="hidden xl:flex w-80 flex-col gap-8 sticky top-24 self-start">
-          
-          <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider text-[11px]">Quick Links</h3>
-            <div className="flex flex-col gap-2.5 text-sm text-blue-700 font-medium">
-              {['My open issues', 'Done issues', 'View all boards', 'Create a filter'].map(link => (
-                <a key={link} href="#" className="hover:underline">{link}</a>
-              ))}
-            </div>
-          </div>
-          
-        </aside> */}
       </main>
 
       {addTaskModalOpen && (
         <CreateTask
           projData={projData}
           onClose={() => setAddTaskModelOpen(false)}
+          usersMap={usersMap}
         />
       )}
 
@@ -249,8 +305,17 @@ const ProjectPage = () => {
           projectid={projData.projectId}
           onClose={() => setInviteModalOpen(false)}
           projData={projData}
+          usersMap={usersMap}
         />
       )}
+
+      <TeamModal
+        isOpen={teamModalOpen}
+        onClose={() => setTeamModalOpen(false)}
+        projData={projData}
+        usersMap={usersMap}
+        projectid={projectid}
+      />
     </div>
   );
 };

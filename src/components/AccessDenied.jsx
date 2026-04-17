@@ -10,47 +10,34 @@ const AccessDenied = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-[#F4F5F7] text-slate-900 items-center justify-center p-6">
+    <div className="flex flex-col flex-1 min-h-screen bg-[#F4F5F7] text-[#172B4D] items-center justify-center p-6">
       
       {/* Main Card */}
-      <div className="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-2xl p-10 flex flex-col items-center text-center gap-8">
+      <div className="w-full max-w-sm bg-white border border-[#DFE1E6] rounded shadow-sm p-8 flex flex-col items-center text-center gap-4">
         
-        {/* The Shield: Constant Glow + Hover Shake */}
-        <div className="relative group">
-          {/* Outer Glow Layer */}
-          <div className="absolute inset-0 bg-red-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-          
-          {/* Icon Container */}
-          <div className="relative p-7 rounded-full bg-red-50 text-red-600 border border-red-100 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300">
-            <ShieldAlert size={64} strokeWidth={1.5} />
-          </div>
+        {/* Icon Container */}
+        <div className="w-12 h-12 rounded bg-red-50 text-red-600 border border-red-100 flex items-center justify-center shrink-0 mb-2">
+          <ShieldAlert size={24} strokeWidth={2} />
         </div>
 
         {/* Text Content */}
-        <div className="space-y-3">
-          <h1 className="text-2xl font-extrabold text-slate-950 tracking-tight">Access Denied</h1>
-          <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
+        <div className="space-y-2">
+          <h1 className="text-lg font-semibold tracking-tight">Access Denied</h1>
+          <p className="text-sm text-[#42526E] leading-relaxed">
             You don't have permission to access this project. Please contact the administrator for a room invite.
           </p>
-          <div className="inline-block px-3 py-1 bg-gray-100 text-gray-500 rounded text-[10px] font-bold uppercase tracking-widest">
-            Forbidden • 403
-          </div>
         </div>
 
         {/* Action Button */}
-        <div className="w-full pt-4 border-t border-gray-50">
+        <div className="w-full pt-4">
           <button 
             onClick={handleBackToDashboard}
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70"
+            className="w-full py-2 bg-[#0052CC] hover:bg-[#0747A6] text-white text-sm font-medium rounded transition-colors flex items-center justify-center gap-2"
           >
-            Back to My Dashboard
+            Back to Dashboard
           </button>
         </div>
       </div>
-
-      <p className="mt-8 text-[10px] text-gray-400 font-semibold uppercase tracking-[0.2em]">
-        Arca Security Protocol
-      </p>
     </div>
   );
 };

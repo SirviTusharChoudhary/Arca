@@ -125,7 +125,14 @@ const CreateProject = ({ isOpen, onClose, addProject }) => {
             Cancel
           </button>
           <button 
-          onClick={ () => {addProject(projectName, projectType, projectId, selectedColor);onClose}}
+            onClick={() => {
+              if (!projectName.trim()) {
+                alert("Please enter a project name first.");
+                return;
+              }
+              addProject(projectName, projectType, projectId, selectedColor);
+              onClose();
+            }}
             className="px-5 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all"
           >
             Create Project

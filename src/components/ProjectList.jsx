@@ -41,7 +41,7 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
             <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
               {project.projectName}
             </h3>
-            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">
+            <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold">
               {project.projectType || "Software"} Room
             </p>
           </div>
