@@ -9,7 +9,7 @@ import {
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 
-const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap }) => {
+const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => {
   const [star, setStar] = useState(task.starred);
   const [expanded, setExpanded] = useState(false);
 
@@ -88,7 +88,8 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap }) => {
           value={task.status || "To Do"}
           onClick={(e) => e.stopPropagation()}
           onChange={updateStatus}
-          className={`px-2 py-0.5 text-xs font-semibold rounded outline-none border border-transparent cursor-pointer transition-colors duration-300 focus:ring-1 focus:ring-blue-500 ${
+          disabled={isReadOnly}
+          className={`px-2 py-0.5 text-xs font-semibold rounded outline-none border border-transparent ${isReadOnly ? 'cursor-default opacity-90 appearance-none' : 'cursor-pointer'} transition-colors duration-300 focus:ring-1 focus:ring-blue-500 ${
             task.status === "In Progress"
               ? "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-900/50"
               : task.status === "Done"
@@ -114,10 +115,11 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap }) => {
         <Star
           onClick={(e) => {
             e.stopPropagation();
+            if (isReadOnly) return;
             setStar(!star);
             Starred(task);
           }}
-          className={`w-4 h-4 cursor-pointer transition-colors ${
+          className={`w-4 h-4 ${isReadOnly ? 'cursor-default opacity-50' : 'cursor-pointer'} transition-colors ${
             star
               ? "text-yellow-500 fill-yellow-500"
               : "text-gray-300 dark:text-slate-600 hover:text-yellow-500 dark:hover:text-yellow-500"

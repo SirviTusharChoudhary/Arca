@@ -280,6 +280,7 @@ const ProjectPage = () => {
                     isAdmin={projData.admin === user.uid}
                     handleDeleteTask={handleDeleteTask}
                     usersMap={usersMap}
+                    isReadOnly={category === 0}
                   />
                 ))
               ) : (
