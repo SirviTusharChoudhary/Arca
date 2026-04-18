@@ -10,6 +10,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
   const [taskTitle, setTaskTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("Medium");
+  const [deadline, setDeadline] = useState(null);
   const [assignedTo, setAssignedTo] = useState(projData?.admin || "");
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +28,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
         taskId: taskId,
         projectId: projectid,
         assignedTo: assignedTo,
+        deadline: deadline,
         status: "To Do",
         starred: false,
         priority: priority,
@@ -89,17 +91,17 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             {/* Priority Menu */}
-            <div>
-              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
+            <div className="col-span-1">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2 truncate">
                 Priority
               </label>
               <div className="relative">
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
+                  className="w-full appearance-none px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
                 >
                   <option className="bg-white dark:bg-slate-800" value="Low">Low</option>
                   <option className="bg-white dark:bg-slate-800" value="Medium">Medium</option>
@@ -107,14 +109,14 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                   <option className="bg-white dark:bg-slate-800" value="Urgent">Urgent</option>
                 </select>
                 <ChevronDown
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
                   size={14}
                 />
               </div>
             </div>
 
             {/* AssignedTo Selection Menu */}
-            <div>
+            <div className="col-span-3">
               <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2">
                 Assign Member
               </label>
@@ -122,7 +124,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                 <select
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
+                  className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer truncate pr-8"
                 >
                   <option className="bg-white dark:bg-slate-800" value={projData?.admin}>
                     {usersMap?.[projData?.admin]?.displayName ||
@@ -132,7 +134,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                   </option>
                   {projData?.members?.map((uid) => (
                     <option className="bg-white dark:bg-slate-800" key={uid} value={uid}>
-                      {usersMap?.[uid]?.displayName ||
+                      {(usersMap?.[uid]?.displayName && usersMap?.[uid]?.username) ? `${usersMap[uid].displayName} (@${usersMap[uid].username})` :
                         usersMap?.[uid]?.name ||
                         `Member: ${uid.slice(0, 6)}`}
                     </option>
@@ -141,6 +143,21 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
                 <ChevronDown
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
                   size={14}
+                />
+              </div>
+            </div>
+
+
+            {/* Deadline Input */}
+            <div className="col-span-4 mt-2">
+              <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
+                Target Deadline
+              </label>
+              <div className="relative group">
+                <input 
+                  type="datetime-local"
+                  onChange={e => setDeadline(e.target.valueAsNumber)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all text-sm appearance-none cursor-pointer"
                 />
               </div>
             </div>

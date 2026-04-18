@@ -20,6 +20,7 @@ const Dashboard = () => {
   const { user, userData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [joinedProject, setJoinedProject] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -90,10 +91,15 @@ const Dashboard = () => {
     return <AccessDenied />;
   }
 
+  const filteredProjects = joinedProject.filter(proj => 
+    proj.projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    proj.projectType?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* 1. Global Navigation */}
-      <Navbar text={"Project"} />
+      <Navbar text={"Project"} onSearch={setSearchQuery} />
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-10 flex flex-col gap-10">
         {/* 2. Hero Header */}
@@ -119,7 +125,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <ProjectList projects={joinedProject} isAdminUid={user.uid} />
+        <ProjectList projects={filteredProjects} isAdminUid={user.uid} />
 
         {modalOpen && (
           <CreateProject

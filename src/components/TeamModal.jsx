@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import useDebounce from "../hooks/useDebounce";
 import {
   X,
   ShieldCheck,
@@ -12,6 +13,8 @@ import { db } from "../services/firebase";
 
 const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
   const { user } = useAuth();
+  const [memberSearch, setMemberSearch] = useState("");
+  const debouncedSearch = useDebounce(memberSearch, 300);
 
   if (!isOpen) return null;
 
@@ -50,8 +53,22 @@ const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
     });
   }
 
-  const admins = teamMembers.filter((m) => m.role === "Admin");
-  const members = teamMembers.filter((m) => m.role === "Member");
+  const admins = teamMembers
+    .filter((m) => m.role === "Admin")
+    .filter(m => 
+      !debouncedSearch || 
+      m.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+      m.displayName?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      m.email?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  const members = teamMembers
+    .filter((m) => m.role === "Member")
+    .filter(m => 
+      !debouncedSearch || 
+      m.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+      m.displayName?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      m.email?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
 
   const renderMember = (member) => (
     <div
@@ -130,6 +147,8 @@ const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
             <input
               type="text"
               placeholder="Filter by name or email..."
+              value={memberSearch}
+              onChange={(e) => setMemberSearch(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 dark:focus:border-blue-500 transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500"
             />
           </div>
@@ -141,7 +160,7 @@ const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
 
         {/* Member List */}
         <div className="max-h-[400px] overflow-y-auto py-2">
-          {teamMembers.length > 0 ? (
+          {admins.length > 0 || members.length > 0 ? (
             <>
               {admins.length > 0 && (
                 <div className="mb-2">

@@ -5,6 +5,7 @@ import {
   Trash2,
   MoreVertical,
   ChevronDown,
+  Calendar,
 } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
@@ -51,19 +52,49 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => 
           </p>
 
           <div className="flex items-center text-xs text-gray-500 dark:text-slate-400 mt-0.5 gap-2 min-w-0">
-            <span className="whitespace-nowrap shrink-0">
+            {isReadOnly && <span className="whitespace-nowrap shrink-0">
               Assigned to:{" "}
-              {usersMap?.[task.assignedTo]?.displayName ||
+              {`@${usersMap?.[task.assignedTo]?.username}` ||
                 usersMap?.[task.assignedTo]?.name ||
                 "Unknown"}
-            </span>
+            </span>}
+
+            {task.deadline && (
+              <div className="flex items-center gap-2 min-w-0 shrink-0">
+                <span className="text-gray-300 dark:text-slate-600 shrink-0">•</span>
+                {(() => {
+                  const isOverdue = task.deadline < Date.now() && task.status !== "Done";
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-1.5 font-bold tracking-tight ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                        <Calendar size={13} strokeWidth={2.5} />
+                        <span className="whitespace-nowrap">
+                          {(() => {
+                            const d = new Date(task.deadline);
+                            const now = new Date();
+                            const options = { month: 'short', day: 'numeric' };
+                            if (d.getFullYear() !== now.getFullYear()) options.year = 'numeric';
+                            return d.toLocaleDateString([], options);
+                          })()}
+                        </span>
+                      </div>
+                      {isOverdue && (
+                        <span className="px-1.5 py-0.5 bg-red-600 text-white dark:bg-red-500 text-[9px] font-black uppercase rounded-[4px] leading-none shrink-0 shadow-sm animate-pulse">
+                          Overdue
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {task.description && (
               <div className="flex items-center min-w-0 shrink">
                 <span className="text-gray-300 dark:text-slate-600 shrink-0">•</span>
                 <span className="truncate ml-1.5 mr-1">
                   {task.description.length > 50
-                    ? task.description.slice(0, 50) + "..."
+                    ? task.description.slice(0, 60) + "..."
                     : task.description}
                 </span>
                 <button

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useDebounce from '../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { Search, Box, Sun, Moon } from 'lucide-react';
 import ProfilePopup from './ProfilePopup';
@@ -7,11 +8,19 @@ import { auth } from '../services/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const Navbar = ({ text }) => {
+const Navbar = ({ text, onSearch }) => {
   const { userData } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [showProfile, setShowProfile] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const debouncedSearch = useDebounce(searchValue, 300);
   const nav = useNavigate();
+
+  useEffect(() => {
+    if (onSearch) {
+      onSearch(debouncedSearch);
+    }
+  }, [debouncedSearch, onSearch]);
 
   async function signout() {
     await signOut(auth);
@@ -51,6 +60,8 @@ const Navbar = ({ text }) => {
           <input
             type="search"
             placeholder={`Search ${text}...`}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             className="w-72 h-9 pl-9 pr-3 text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-200 dark:focus:ring-blue-500/30 text-slate-900 dark:text-slate-100 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500"
           />
         </div>

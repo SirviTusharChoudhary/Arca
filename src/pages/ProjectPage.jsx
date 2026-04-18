@@ -24,6 +24,8 @@ import CreateTask from "../components/CreateTask";
 import PendingInvite from "../components/PendingInvite";
 import TaskList from "../components/TaskList";
 import TeamModal from "../components/TeamModal";
+import FilterSidebar from "../components/FilterSidebar";
+import { Filter } from "lucide-react";
 
 const ProjectPage = () => {
   const { userData, user } = useAuth();
@@ -38,6 +40,9 @@ const ProjectPage = () => {
   const [category, setCategory] = useState(1);
   const [pendingInvites, setPendingInvites] = useState([]);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
+  const [filters, setFilters] = useState({ priority: [], status: [], sortBy: 'newest' });
+  const [searchQuery, setSearchQuery] = useState("");
   const [usersMap, setUsersMap] = useState({});
 
   useEffect(() => {
@@ -93,7 +98,6 @@ const ProjectPage = () => {
           setProjData(data);
           setPendingInvites(data.pendingInvite || []);
         } else {
-          // If project doesn't exist, kick to dashboard
           navigate('/dashboard', { replace: true });
         }
       });
@@ -160,12 +164,41 @@ const ProjectPage = () => {
     }
   }
 
+  const filteredTasks = assignedTasks
+    .filter(task => {
+      const priorityMatch = filters.priority.length === 0 || filters.priority.includes(task.priority);
+      const statusMatch = filters.status.length === 0 || filters.status.includes(task.status);
+      const searchMatch = !searchQuery || 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const isTaskOverdue = task.deadline && task.deadline < Date.now() && task.status !== "Done";
+      const overdueMatch = !filters.overdueOnly || isTaskOverdue;
+      
+      return priorityMatch && statusMatch && searchMatch && overdueMatch;
+    })
+    .sort((a, b) => {
+      if (filters.sortBy === 'deadlineAsc') {
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return a.deadline - b.deadline;
+      }
+      if (filters.sortBy === 'deadlineDesc') {
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return b.deadline - a.deadline;
+      }
+      // newest (default)
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+
   if (loading) return <p>LOL WAIT....</p>;
 
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      {/* 1. Using our Arca Navbar instead of the old header */}
-      <Navbar text={"Task"} />
+      <Navbar text={"Task"} onSearch={setSearchQuery} />
 
       {/* Main Content Area */}
       <main className="flex flex-1 p-2 lg:p-10 gap-10">
@@ -215,6 +248,23 @@ const ProjectPage = () => {
                 >
                   <Users size={14} />
                   <span>Team</span>
+                </button>
+
+                <button
+                  onClick={() => setFilterSidebarOpen(true)}
+                  className={`flex items-center self-start gap-2 px-3 py-1.5 text-xs font-medium border rounded-md transition-all ${
+                    filters.priority.length > 0 || filters.status.length > 0
+                      ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400"
+                      : "bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <div className="relative">
+                    <Filter size={14} />
+                    {(filters.priority.length > 0 || filters.status.length > 0) && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full border border-white dark:border-slate-900" />
+                    )}
+                  </div>
+                  <span>Filter</span>
                 </button>
               </div>
             </div>
@@ -272,8 +322,8 @@ const ProjectPage = () => {
 
             {/* Task List (Row Based) */}
             <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
-              {assignedTasks?.length > 0 ? (
-                assignedTasks.map((task, index) => (
+              {filteredTasks?.length > 0 ? (
+                filteredTasks.map((task, index) => (
                   <TaskList
                     key={index}
                     task={task}
@@ -316,6 +366,13 @@ const ProjectPage = () => {
         projData={projData}
         usersMap={usersMap}
         projectid={projectid}
+      />
+
+      <FilterSidebar
+        isOpen={filterSidebarOpen}
+        onClose={() => setFilterSidebarOpen(false)}
+        filters={filters}
+        setFilters={setFilters}
       />
     </div>
   );
