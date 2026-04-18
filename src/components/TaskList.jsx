@@ -63,10 +63,11 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => 
               <div className="flex items-center gap-2 min-w-0 shrink-0">
                 <span className="text-gray-300 dark:text-slate-600 shrink-0">•</span>
                 {(() => {
-                  const isOverdue = task.deadline < Date.now() && task.status !== "Done";
+                  const deadlineTime = new Date(task.deadline).getTime();
+                  const isOverdue = deadlineTime < Date.now() && task.status !== "Done";
                   return (
                     <div className="flex items-center gap-2">
-                      <div className={`flex items-center gap-1.5 font-bold tracking-tight ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                      <div className={`flex items-center gap-1.5 font-bold tracking-tight ${isOverdue ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`}>
                         <Calendar size={13} strokeWidth={2.5} />
                         <span className="whitespace-nowrap">
                           {(() => {
@@ -79,7 +80,7 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => 
                         </span>
                       </div>
                       {isOverdue && (
-                        <span className="px-1.5 py-0.5 bg-red-600 text-white dark:bg-red-500 text-[9px] font-black uppercase rounded-[4px] leading-none shrink-0 shadow-sm animate-pulse">
+                        <span className="px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-black uppercase rounded-[4px] leading-none shrink-0 shadow-sm animate-pulse">
                           Overdue
                         </span>
                       )}

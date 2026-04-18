@@ -172,7 +172,7 @@ const ProjectPage = () => {
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
         task.description?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const isTaskOverdue = task.deadline && task.deadline < Date.now() && task.status !== "Done";
+      const isTaskOverdue = task.deadline && new Date(task.deadline).getTime() < Date.now() && task.status !== "Done";
       const overdueMatch = !filters.overdueOnly || isTaskOverdue;
       
       return priorityMatch && statusMatch && searchMatch && overdueMatch;
