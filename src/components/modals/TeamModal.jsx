@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import useDebounce from "../hooks/useDebounce";
+import useDebounce from "../../hooks/useDebounce";
 import {
   X,
   ShieldCheck,
-  UserPlus,
-  MoreHorizontal,
   UserMinus,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { doc, updateDoc, arrayRemove } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 
 const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
   const { user } = useAuth();
@@ -106,9 +104,6 @@ const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
             <UserMinus size={18} />
           </button>
         )}
-        <button className="p-1.5 text-gray-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-all">
-          <MoreHorizontal size={18} />
-        </button>
       </div>
     </div>
   );
@@ -152,10 +147,6 @@ const TeamModal = ({ isOpen, onClose, projData, usersMap, projectid }) => {
               className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 dark:focus:border-blue-500 transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500"
             />
           </div>
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">
-            <UserPlus size={14} />
-            <span>Add people</span>
-          </button>
         </div>
 
         {/* Member List */}

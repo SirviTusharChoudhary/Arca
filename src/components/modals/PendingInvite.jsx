@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, UserMinus, ShieldCheck, Clock } from "lucide-react";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 
 const PendingInvite = ({ projData, projectid, onClose, usersMap }) => {
   const [localPending, setLocalPending] = useState([]);

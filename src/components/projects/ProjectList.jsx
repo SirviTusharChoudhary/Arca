@@ -1,5 +1,6 @@
 import React from "react";
-import { MoreVertical, Users, LayoutGrid } from "lucide-react";
+import { motion } from "framer-motion";
+import { Users, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const ProjectList = ({ projects, isAdminUid, userData }) => {
@@ -17,23 +18,32 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
       {projects.map((project) => (
-        <div
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 24 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+          }}
+          whileHover={{ y: -5, boxShadow: "0 16px 48px rgba(37,99,235,0.12)" }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => nav(`/project/${project.projectId}`)}
           key={project.projectId}
-          className="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-5 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-sm dark:hover:shadow-lg transition-all cursor-pointer flex flex-col gap-4"
+          className="group bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-md p-5 hover:border-blue-200 dark:hover:border-slate-700 transition-all cursor-pointer flex flex-col gap-4"
         >
           {/* Top Section */}
           <div className="flex justify-between items-start">
-            <div
-              className={`w-12 h-12 rounded-lg ${project.selectedColor || "bg-blue-600"} flex items-center justify-center text-white font-bold text-lg shadow-sm`}
+            <motion.div
+              whileHover={{ rotate: [0, -8, 8, -4, 0], transition: { duration: 0.5 } }}
+              className={`w-12 h-12 rounded-md ${project.selectedColor || "bg-blue-600"} flex items-center justify-center text-white font-bold text-lg shadow-sm`}
             >
               {project.projectName?.substring(0, 2).toUpperCase()}
-            </div>
-            <button className="text-gray-400 opacity-0 group-hover:opacity-100 hover:text-slate-900 transition-all">
-              <MoreVertical size={18} />
-            </button>
+            </motion.div>
           </div>
 
           {/* Info Section */}
@@ -41,7 +51,7 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
             <h3 className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
               {project.projectName}
             </h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest font-bold">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest font-bold">
               {project.projectType || "Software"} Room
             </p>
           </div>
@@ -59,14 +69,19 @@ const ProjectList = ({ projects, isAdminUid, userData }) => {
             </div>
 
             {project.admin === isAdminUid && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 18, delay: 0.1 }}
+                className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-900/50"
+              >
                 Admin
-              </span>
+              </motion.span>
             )}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

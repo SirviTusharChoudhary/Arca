@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Plus, LayoutGrid, MoreVertical, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { db } from "../services/firebase";
 import {
@@ -9,11 +9,13 @@ import {
   writeBatch,
   arrayUnion,
 } from "firebase/firestore";
-import CreateProject from "../components/CreateProject";
-import ProjectList from "../components/ProjectList";
-import AccessDenied from "../components/AccessDenied";
+import CreateProject from "../components/modals/CreateProject";
+import ProjectList from "../components/projects/ProjectList";
+import AccessDenied from "../components/ui/AccessDenied";
 import { useAuth } from "../context/AuthContext.jsx";
-import Navbar from "../components/Navbar.jsx";
+import Navbar from "../components/layout/Navbar.jsx";
+import PageLoader from "../loaders/PageLoader";
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const { uid } = useParams();
@@ -79,13 +81,7 @@ const Dashboard = () => {
     setModalOpen(false);
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-500"></div>
-      </div>
-    );
-  }
+  if (loading) return <PageLoader message="Fetching your projects..." />;
 
   if (user.uid !== uid) {
     return <AccessDenied />;
@@ -102,8 +98,13 @@ const Dashboard = () => {
       <Navbar text={"Project"} onSearch={setSearchQuery} />
 
       <main className="max-w-7xl mx-auto w-full p-6 lg:p-10 flex flex-col gap-10">
-        {/* 2. Hero Header */}
-        <div className="flex items-center justify-between gap-4">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center justify-between gap-4"
+        >
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Your Work</h1>
             <p className="text-gray-500 dark:text-slate-400 text-sm">
@@ -112,15 +113,18 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04, y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
               onClick={() => setModalOpen(!modalOpen)}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
             >
               <Plus size={16} />
               Create project
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         <ProjectList projects={filteredProjects} isAdminUid={user.uid} />
 

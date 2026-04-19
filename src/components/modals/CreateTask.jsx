@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, ChevronDown } from "lucide-react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { useParams } from "react-router-dom";
@@ -21,7 +21,6 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
     setLoading(true);
     try {
       const taskId = uuidv4();
-      console.log(taskId);
       await setDoc(doc(db, "tasks", taskId), {
         title: taskTitle,
         description: description,

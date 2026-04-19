@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Plus,
-  CheckCircle2,
-  UserPlus,
+  Filter,
+  BarChart2,
+  List,
   Link as LinkIcon,
-  Users,
+  Users, UserPlus
 } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
 import {
   collection,
@@ -20,13 +21,14 @@ import {
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useParams, useNavigate } from "react-router-dom";
-import CreateTask from "../components/CreateTask";
-import PendingInvite from "../components/PendingInvite";
-import TaskList from "../components/TaskList";
-import TeamModal from "../components/TeamModal";
-import FilterSidebar from "../components/FilterSidebar";
-import ProjectAnalytics from "../components/ProjectAnalytics";
-import { Filter, BarChart2, List } from "lucide-react";
+import CreateTask from "../components/modals/CreateTask";
+import PendingInvite from "../components/modals/PendingInvite";
+import TaskList from "../components/tasks/TaskList";
+import TeamModal from "../components/modals/TeamModal";
+import FilterSidebar from "../components/layout/FilterSidebar";
+import ProjectAnalytics from "../components/projects/ProjectAnalytics";
+
+import PageLoader from "../loaders/PageLoader";
 
 const ProjectPage = () => {
   const { userData, user } = useAuth();
@@ -209,13 +211,12 @@ const ProjectPage = () => {
         if (!b.deadline) return -1;
         return b.deadline - a.deadline;
       }
-      // newest (default)
       const timeA = a.createdAt?.seconds || 0;
       const timeB = b.createdAt?.seconds || 0;
       return timeB - timeA;
     });
 
-  if (loading) return <p>LOL WAIT....</p>;
+  if (loading) return <PageLoader message="Syncing your tasks..." />;
 
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">

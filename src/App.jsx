@@ -4,10 +4,10 @@ import { useAuth } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import ProjectPage from "./pages/ProjectPage";
-import JoinProjectPage from "./components/JoinProjectPage";
+import JoinProjectPage from "./pages/JoinProjectPage";
 
 const App = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -15,6 +15,8 @@ const App = () => {
       sessionStorage.setItem("redirectPath", location.pathname);
     }
   }, [user, location.pathname]);
+
+  if (loading) return null;
 
   return (
     <>
