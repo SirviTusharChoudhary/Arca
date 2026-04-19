@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CheckCircle2,
   Star,
@@ -13,6 +13,13 @@ import { db } from "../services/firebase";
 const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => {
   const [star, setStar] = useState(task.starred);
   const [expanded, setExpanded] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (!task.deadline || task.status === "Done") return;
+    const interval = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(interval);
+  }, [task.deadline, task.status]);
 
   async function Starred(task) {
     const docRef = doc(db, "tasks", task.taskId || task.id);
@@ -64,7 +71,7 @@ const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => 
                 <span className="text-gray-300 dark:text-slate-600 shrink-0">•</span>
                 {(() => {
                   const deadlineTime = new Date(task.deadline).getTime();
-                  const isOverdue = deadlineTime < Date.now() && task.status !== "Done";
+                  const isOverdue = deadlineTime < now && task.status !== "Done";
                   return (
                     <div className="flex items-center gap-2">
                       <div className={`flex items-center gap-1.5 font-bold tracking-tight ${isOverdue ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`}>

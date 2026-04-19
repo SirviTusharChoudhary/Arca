@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 
-const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
+const CreateTask = ({ projData, roomId, onClose, usersMap }) => { 
   const { projectid } = useParams();
   const [taskTitle, setTaskTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -69,6 +69,7 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
               <input
                 autoFocus
                 type="text"
+                required
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
                 placeholder="What needs to be done?"
@@ -100,13 +101,22 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
               <div className="relative">
                 <select
                   value={priority}
+                  required
                   onChange={(e) => setPriority(e.target.value)}
                   className="w-full appearance-none px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option className="bg-white dark:bg-slate-800" value="Low">Low</option>
-                  <option className="bg-white dark:bg-slate-800" value="Medium">Medium</option>
-                  <option className="bg-white dark:bg-slate-800" value="High">High</option>
-                  <option className="bg-white dark:bg-slate-800" value="Urgent">Urgent</option>
+                  <option className="bg-white dark:bg-slate-800" value="Low">
+                    Low
+                  </option>
+                  <option className="bg-white dark:bg-slate-800" value="Medium">
+                    Medium
+                  </option>
+                  <option className="bg-white dark:bg-slate-800" value="High">
+                    High
+                  </option>
+                  <option className="bg-white dark:bg-slate-800" value="Urgent">
+                    Urgent
+                  </option>
                 </select>
                 <ChevronDown
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none"
@@ -123,20 +133,28 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
               <div className="relative">
                 <select
                   value={assignedTo}
+                  required
                   onChange={(e) => setAssignedTo(e.target.value)}
                   className="w-full appearance-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 outline-none focus:border-blue-500 cursor-pointer truncate pr-8"
                 >
-                  <option className="bg-white dark:bg-slate-800" value={projData?.admin}>
+                  <option
+                    className="bg-white dark:bg-slate-800"
+                    value={projData?.admin}
+                  >
                     {usersMap?.[projData?.admin]?.displayName ||
                       usersMap?.[projData?.admin]?.name ||
                       "Admin"}{" "}
                     (Self)
                   </option>
                   {projData?.members?.map((uid) => (
-                    <option className="bg-white dark:bg-slate-800" key={uid} value={uid}>
-                      {(usersMap?.[uid]?.displayName && usersMap?.[uid]?.username) ? `${usersMap[uid].displayName} (@${usersMap[uid].username})` :
-                        usersMap?.[uid]?.name ||
-                        `Member: ${uid.slice(0, 6)}`}
+                    <option
+                      className="bg-white dark:bg-slate-800"
+                      key={uid}
+                      value={uid}
+                    >
+                      {usersMap?.[uid]?.displayName && usersMap?.[uid]?.username
+                        ? `${usersMap[uid].displayName} (@${usersMap[uid].username})`
+                        : usersMap?.[uid]?.name || `Member: ${uid.slice(0, 6)}`}
                     </option>
                   ))}
                 </select>
@@ -147,16 +165,16 @@ const CreateTask = ({ projData, roomId, onClose, usersMap }) => {
               </div>
             </div>
 
-
             {/* Deadline Input */}
             <div className="col-span-4 mt-2">
               <label className="block text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-0.5">
                 Target Deadline
               </label>
               <div className="relative group">
-                <input 
+                <input
+                  required
                   type="datetime-local"
-                  onChange={e => setDeadline(e.target.valueAsNumber)}
+                  onChange={(e) => setDeadline(e.target.value ? new Date(e.target.value).getTime() : null)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all text-sm appearance-none cursor-pointer"
                 />
               </div>

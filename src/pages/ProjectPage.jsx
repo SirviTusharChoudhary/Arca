@@ -25,7 +25,8 @@ import PendingInvite from "../components/PendingInvite";
 import TaskList from "../components/TaskList";
 import TeamModal from "../components/TeamModal";
 import FilterSidebar from "../components/FilterSidebar";
-import { Filter } from "lucide-react";
+import ProjectAnalytics from "../components/ProjectAnalytics";
+import { Filter, BarChart2, List } from "lucide-react";
 
 const ProjectPage = () => {
   const { userData, user } = useAuth();
@@ -44,6 +45,8 @@ const ProjectPage = () => {
   const [filters, setFilters] = useState({ priority: [], status: [], sortBy: 'newest' });
   const [searchQuery, setSearchQuery] = useState("");
   const [usersMap, setUsersMap] = useState({});
+  const [view, setView] = useState("tasks"); 
+  const [allProjectTasks, setAllProjectTasks] = useState([]);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -145,9 +148,27 @@ const ProjectPage = () => {
     }
     fetchData();
 
+    let unsubAllTasks;
+    if (userData?.uid) {
+      const taskRef = collection(db, "tasks");
+      const qAll = query(
+        taskRef,
+        where("projectId", "==", projectid),
+        orderBy("createdAt", "desc")
+      );
+      unsubAllTasks = onSnapshot(qAll, (data) => {
+        const tasks = data.docs.map((ele) => ({
+          id: ele.id,
+          ...ele.data(),
+        }));
+        setAllProjectTasks(tasks);
+      });
+    }
+
     return () => {
       if (unsubTasks) unsubTasks();
       if (unsubProj) unsubProj();
+      if (unsubAllTasks) unsubAllTasks();
     };
   }, [projectid, userData?.uid, category]);
 
@@ -266,6 +287,34 @@ const ProjectPage = () => {
                   </div>
                   <span>Filter</span>
                 </button>
+
+                {/* Admin View Switcher */}
+                {projData?.admin === user?.uid && (
+                  <div className="flex bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-md p-0.5">
+                    <button
+                      onClick={() => setView("tasks")}
+                      className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
+                        view === "tasks"
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      }`}
+                    >
+                      <List size={14} />
+                      <span>Tasks</span>
+                    </button>
+                    <button
+                      onClick={() => setView("analytics")}
+                      className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
+                        view === "analytics"
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      }`}
+                    >
+                      <BarChart2 size={14} />
+                      <span>Analytics</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -300,45 +349,52 @@ const ProjectPage = () => {
 
           {/* 3. The "Big Three" Tabs */}
           <div className="flex flex-col gap-8">
-            {/* Tab Navigation */}
-            <div className="flex items-center border-b border-gray-200 dark:border-slate-800 gap-6 text-sm font-medium text-gray-600 dark:text-slate-400">
-              {["All Tasks", "Assigned to me", "Worked on", "Starred"].map(
-                (tab, index) => (
-                  <button
-                    key={tab}
-                    onClick={() => setCategory(index)}
-                    className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-blue-700 dark:text-blue-400 font-semibold" : "border-transparent hover:text-blue-600 dark:hover:text-blue-400 hover:border-gray-300 dark:hover:border-slate-600"}`}
-                  >
-                    {tab}
-                    {index === category && (
-                      <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                        {assignedTasks.length}
-                      </span>
-                    )}
-                  </button>
-                ),
-              )}
-            </div>
-
-            {/* Task List (Row Based) */}
-            <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
-              {filteredTasks?.length > 0 ? (
-                filteredTasks.map((task, index) => (
-                  <TaskList
-                    key={index}
-                    task={task}
-                    isAdmin={projData.admin === user.uid}
-                    handleDeleteTask={handleDeleteTask}
-                    usersMap={usersMap}
-                    isReadOnly={category === 0}
-                  />
-                ))
-              ) : (
-                <div className="flex flex-1 flex-col items-center justify-center p-12 text-center text-sm font-medium text-slate-500 min-h-[150px]">
-                  No tasks to display in this category.
+            {/* View Switch Logic */}
+            {view === "tasks" ? (
+              <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {/* Tab Navigation */}
+                <div className="flex items-center border-b border-gray-200 dark:border-slate-800 gap-6 text-sm font-medium text-gray-600 dark:text-slate-400">
+                  {["All Tasks", "Assigned to me", "Worked on", "Starred"].map(
+                    (tab, index) => (
+                      <button
+                        key={tab}
+                        onClick={() => setCategory(index)}
+                        className={`pb-3 border-b-2 transition-colors ${index === category ? "border-blue-600 text-blue-700 dark:text-blue-400 font-semibold" : "border-transparent hover:text-blue-600 dark:hover:text-blue-400 hover:border-gray-300 dark:hover:border-slate-600"}`}
+                      >
+                        {tab}
+                        {index === category && (
+                          <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
+                            {assignedTasks.length}
+                          </span>
+                        )}
+                      </button>
+                    ),
+                  )}
                 </div>
-              )}
-            </div>
+
+                {/* Task List (Row Based) */}
+                <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
+                  {filteredTasks?.length > 0 ? (
+                    filteredTasks.map((task, index) => (
+                      <TaskList
+                        key={index}
+                        task={task}
+                        isAdmin={projData.admin === user.uid}
+                        handleDeleteTask={handleDeleteTask}
+                        usersMap={usersMap}
+                        isReadOnly={category === 0}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex flex-1 flex-col items-center justify-center p-12 text-center text-sm font-medium text-slate-500 min-h-[150px]">
+                      No tasks to display in this category.
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <ProjectAnalytics tasks={allProjectTasks} usersMap={usersMap} />
+            )}
           </div>
         </div>
       </main>

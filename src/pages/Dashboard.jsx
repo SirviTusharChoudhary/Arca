@@ -112,9 +112,6 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <button className="hidden sm:flex px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-transparent border border-gray-300 dark:border-slate-700 rounded-md hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-600 transition-colors">
-              Go to profile
-            </button>
             <button
               onClick={() => setModalOpen(!modalOpen)}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
