@@ -224,7 +224,10 @@ const ProjectPage = () => {
 
   return (
     <div className="flex flex-col flex-1 h-full min-h-screen bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      <Navbar text={"Task"} onSearch={setSearchQuery} />
+      <Navbar
+        text={view === "meetings" ? "Meetings" : "Task"}
+        onSearch={setSearchQuery}
+      />
 
       {/* Main Content Area */}
       <main className="flex flex-1 p-2 lg:p-6 lg:pt-5 gap-10">
@@ -434,6 +437,7 @@ const ProjectPage = () => {
                 projectId={projectid}
                 projData={projData}
                 userData={userData}
+                searchQuery={searchQuery}
               />
             )}
           </div>

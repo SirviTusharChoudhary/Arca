@@ -5,8 +5,9 @@ import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from "firebase
 import { db } from "../../services/firebase";
 import MeetingCard from "./MeetingCard";
 import ScheduleMeetingModal from "./ScheduleMeetingModal";
+import { formatDate } from "./meetingHelpers";
 
-const MeetingsPanel = ({ projectId, projData, userData }) => {
+const MeetingsPanel = ({ projectId, projData, userData, searchQuery = "" }) => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -58,7 +59,40 @@ const MeetingsPanel = ({ projectId, projData, userData }) => {
     { id: "completed", label: "Completed", count: completed.length },
   ];
 
-  const displayList = tab === "upcoming" ? [...live, ...upcoming] : completed;
+  const displayList = useMemo(() => {
+    const tabList = tab === "upcoming" ? [...live, ...upcoming] : completed;
+    const queryText = searchQuery.trim().toLowerCase();
+    if (!queryText) return tabList;
+
+    return tabList.filter((meeting) => {
+      const title = meeting.title?.toLowerCase() || "";
+      const meetLink = meeting.meetLink?.toLowerCase() || "";
+      const scheduledDate = meeting.scheduledAt?.toDate
+        ? meeting.scheduledAt.toDate()
+        : new Date(meeting.scheduledAt);
+      const formattedDate = formatDate(meeting.scheduledAt).toLowerCase();
+      const longDate = scheduledDate.toLocaleDateString([], {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }).toLowerCase();
+      const shortDate = scheduledDate.toLocaleDateString().toLowerCase();
+      const timeText = scheduledDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).toLowerCase();
+
+      return (
+        title.includes(queryText) ||
+        meetLink.includes(queryText) ||
+        formattedDate.includes(queryText) ||
+        longDate.includes(queryText) ||
+        shortDate.includes(queryText) ||
+        timeText.includes(queryText)
+      );
+    });
+  }, [tab, live, upcoming, completed, searchQuery]);
 
   return (
     <motion.div
@@ -137,9 +171,17 @@ const MeetingsPanel = ({ projectId, projData, userData }) => {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-500 dark:text-slate-400">
-                {tab === "upcoming" ? "No upcoming meetings" : "No completed meetings yet"}
+                {searchQuery
+                  ? "No meetings found for your search"
+                  : tab === "upcoming"
+                    ? "No upcoming meetings"
+                    : "No completed meetings yet"}
               </p>
-              {tab === "upcoming" && isAdmin && (
+              {searchQuery ? (
+                <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                  Try a different keyword or clear search.
+                </p>
+              ) : tab === "upcoming" && isAdmin && (
                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                   Click <strong>Schedule</strong> to set up your first meeting.
                 </p>
