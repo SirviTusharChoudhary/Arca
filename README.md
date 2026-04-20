@@ -1,5 +1,12 @@
 <div align="center">
-  <h1>⬡ Arca</h1>
+  <h1 style="display:flex;align-items:center;justify-content:center;gap:10px;margin:0;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Arca logo">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+      <path d="M3.29 7 12 12l8.71-5"></path>
+      <path d="M12 22V12"></path>
+    </svg>
+    <span style="color:#2563EB;font-weight:800;letter-spacing:-0.03em;">Arca</span>
+  </h1>
   <p><strong>A modern, real-time project management platform built for teams.</strong></p>
   <p>Inspired by the simplicity of Jira, with the polish of a premium SaaS product.</p>
   <br/>
@@ -16,7 +23,7 @@
 
 Managing tasks and teams in modern software projects is fragmented. Teams resort to a patchwork of spreadsheets, chat threads, and heavyweight tools — creating noise instead of clarity.
 
-**Arca** solves this by providing a single, focused workspace where project admins can create projects, assign tasks with priorities and deadlines, track team workload, and monitor progress in real time — all with a fluid, animated interface that doesn't feel like work to use.
+**Arca** solves this by providing a single, focused workspace where project admins can create projects, assign tasks with priorities and deadlines, track team workload, manage meetings, and monitor progress in real time — all with a fluid, animated interface that doesn't feel like work to use.
 
 ---
 
@@ -63,18 +70,17 @@ Managing tasks and teams in modern software projects is fragmented. Teams resort
 - **Priority Bar Chart** — distribution across `Urgent`, `High`, `Medium`, `Low`
 - **Team Workload** — Jira-style horizontal progress bars showing tasks per member (top 6)
 
+### 💬 Google Meet Integration (Meetings)
+- **Schedule Meetings**: Native integration to orchestrate Google Meet sessions directly within the project workspace
+- **Smart Status Transitions**: Meetings dynamically state-switch between `Upcoming` (with high-precision countdowns), `Live` (pulsing indicator), and `Completed`
+- **Time-Gated Access**: The "Join" button becomes exclusively active during the scheduled meeting duration, redirecting directly to your GMeet room
+- **Compact Jira-Style UI**: Sleek, single-line table rows prioritizing screen real estate and readability without bulky cards
+- **Admin Control**: Meeting creators or workspace admins can seamlessly delete meetings
+
 ### 🌙 Dark Mode & Theming
 - Full **Light / Dark mode** toggle persisted in `localStorage`
 - Smooth, animated Sun/Moon icon transition in the Navbar
 - Every component supports both themes with zero flash on load
-
-### ✨ Animations
-- Powered by **Framer Motion** throughout:
-  - Stagger animations on all list and card renders
-  - Spring-based hover effects on buttons and cards
-  - Slide-in task descriptions on expand
-  - Animated sidebar entrance / exit
-  - Page-level fade-in transitions
 
 ---
 
@@ -166,42 +172,150 @@ Paste the following into your [Firebase Console → Firestore → Rules](https:/
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
-    // Users: signed-in users can read all; can only write their own doc
-    // Exception: any signed-in user can update joinedProjects (needed for invite flow)
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function projectPath(projectId) {
+      return /databases/$(database)/documents/projects/$(projectId);
+    }
+
+    function projectExists(projectId) {
+      return exists(projectPath(projectId));
+    }
+
+    function projectData(projectId) {
+      return get(projectPath(projectId)).data;
+    }
+
+    function isProjectAdmin(projectId) {
+      return isSignedIn() &&
+        projectExists(projectId) &&
+        projectData(projectId).admin == request.auth.uid;
+    }
+
+    function isProjectMember(projectId) {
+      return isSignedIn() &&
+        projectExists(projectId) &&
+        (
+          projectData(projectId).admin == request.auth.uid ||
+          request.auth.uid in projectData(projectId).members
+        );
+    }
+
+    function isValidTaskStatus(status) {
+      return status in ["To Do", "In Progress", "Done"];
+    }
+
+    function isValidTaskPriority(priority) {
+      return priority in ["Low", "Medium", "High", "Urgent"];
+    }
+
+    // USER DOCUMENTS
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && (
-        request.auth.uid == userId ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedProjects'])
+      allow read: if isSignedIn();
+
+      allow create: if isSelf(userId) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.joinedProjects is list;
+
+      allow update: if isSignedIn() && (
+        // User can edit own profile.
+        isSelf(userId) ||
+        // Needed by current admin invite flow (approve/remove member updates target user's joinedProjects).
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["joinedProjects"])
       );
+
+      allow delete: if false;
     }
 
-    // Projects: any signed-in user can read/create
-    // Only admin can update/delete; members can only add themselves to pendingInvite
+    // PROJECT DOCUMENTS
     match /projects/{projectId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && (
-        resource.data.admin == request.auth.uid ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pendingInvite'])
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+        request.resource.data.admin == request.auth.uid &&
+        request.resource.data.projectId == projectId &&
+        request.resource.data.pendingInvite is list &&
+        request.resource.data.members is list;
+
+      allow update: if isSignedIn() && (
+        // Project admin can update project freely.
+        isProjectAdmin(projectId) ||
+        // Non-admin can only request access by touching pendingInvite only.
+        (
+          !isProjectMember(projectId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["pendingInvite"]) &&
+          request.auth.uid in request.resource.data.pendingInvite
+        )
       );
-      allow delete: if request.auth != null && resource.data.admin == request.auth.uid;
+      allow delete: if isProjectAdmin(projectId);
+
+      // MEETINGS SUBCOLLECTION
+      match /meetings/{meetingId} {
+        allow read: if isProjectMember(projectId);
+
+        allow create: if isProjectAdmin(projectId) &&
+          request.resource.data.keys().hasOnly([
+            "title",
+            "meetLink",
+            "scheduledAt",
+            "duration",
+            "createdBy",
+            "createdAt"
+          ]) &&
+          request.resource.data.createdBy == request.auth.uid;
+
+        allow update: if isProjectAdmin(projectId);
+        allow delete: if isProjectAdmin(projectId);
+      }
     }
 
-    // Tasks: project members and admin can read; only admin can create/delete
-    // An assigned member can update status and starred on their own tasks
+    // TASK DOCUMENTS
     match /tasks/{taskId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && (
-        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.admin == request.auth.uid ||
-        (resource.data.assignedTo == request.auth.uid &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'starred']))
+      allow read: if isSignedIn() &&
+        resource.data.projectId is string &&
+        isProjectMember(resource.data.projectId);
+
+      allow create: if isSignedIn() &&
+        request.resource.data.projectId is string &&
+        isProjectAdmin(request.resource.data.projectId) &&
+        request.resource.data.keys().hasOnly([
+          "title",
+          "description",
+          "taskId",
+          "projectId",
+          "assignedTo",
+          "deadline",
+          "status",
+          "starred",
+          "priority",
+          "projectName",
+          "createdAt"
+        ]) &&
+        request.resource.data.taskId == taskId &&
+        isValidTaskStatus(request.resource.data.status) &&
+        isValidTaskPriority(request.resource.data.priority);
+
+      allow update: if isSignedIn() && (
+        // Admin can update tasks in their project.
+        isProjectAdmin(resource.data.projectId) ||
+        // Assignee can only change status/starred.
+        (
+          resource.data.assignedTo == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "starred"]) &&
+          request.resource.data.projectId == resource.data.projectId &&
+          request.resource.data.assignedTo == resource.data.assignedTo &&
+          request.resource.data.taskId == resource.data.taskId &&
+          isValidTaskStatus(request.resource.data.status)
+        )
       );
-      allow delete: if request.auth != null &&
-        get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.admin == request.auth.uid;
+
+      allow delete: if isSignedIn() && isProjectAdmin(resource.data.projectId);
     }
   }
 }
