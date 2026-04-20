@@ -12,7 +12,7 @@ import { db } from "../../services/firebase";
 const TaskList = ({ task, isAdmin, handleDeleteTask, usersMap, isReadOnly }) => {
   const [star, setStar] = useState(task.starred);
   const [expanded, setExpanded] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (!task.deadline || task.status === "Done") return;

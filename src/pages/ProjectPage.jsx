@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Plus,
   Filter,
   BarChart2,
   List,
   Link as LinkIcon,
-  Users, UserPlus
+  Users, UserPlus, CheckCircle2, Video
 } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -27,6 +27,7 @@ import TaskList from "../components/tasks/TaskList";
 import TeamModal from "../components/modals/TeamModal";
 import FilterSidebar from "../components/layout/FilterSidebar";
 import ProjectAnalytics from "../components/projects/ProjectAnalytics";
+import MeetingsPanel from "../components/meetings/MeetingsPanel";
 
 import PageLoader from "../loaders/PageLoader";
 
@@ -187,34 +188,37 @@ const ProjectPage = () => {
     }
   }
 
-  const filteredTasks = assignedTasks
-    .filter(task => {
-      const priorityMatch = filters.priority.length === 0 || filters.priority.includes(task.priority);
-      const statusMatch = filters.status.length === 0 || filters.status.includes(task.status);
-      const searchMatch = !searchQuery || 
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const isTaskOverdue = task.deadline && new Date(task.deadline).getTime() < Date.now() && task.status !== "Done";
-      const overdueMatch = !filters.overdueOnly || isTaskOverdue;
-      
-      return priorityMatch && statusMatch && searchMatch && overdueMatch;
-    })
-    .sort((a, b) => {
-      if (filters.sortBy === 'deadlineAsc') {
-        if (!a.deadline) return 1;
-        if (!b.deadline) return -1;
-        return a.deadline - b.deadline;
-      }
-      if (filters.sortBy === 'deadlineDesc') {
-        if (!a.deadline) return 1;
-        if (!b.deadline) return -1;
-        return b.deadline - a.deadline;
-      }
-      const timeA = a.createdAt?.seconds || 0;
-      const timeB = b.createdAt?.seconds || 0;
-      return timeB - timeA;
-    });
+  const [currentTime] = useState(() => Date.now());
+  const filteredTasks = useMemo(() => {
+    return assignedTasks
+      .filter(task => {
+        const priorityMatch = filters.priority.length === 0 || filters.priority.includes(task.priority);
+        const statusMatch = filters.status.length === 0 || filters.status.includes(task.status);
+        const searchMatch = !searchQuery || 
+          task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const isTaskOverdue = task.deadline && new Date(task.deadline).getTime() < currentTime && task.status !== "Done";
+        const overdueMatch = !filters.overdueOnly || isTaskOverdue;
+        
+        return priorityMatch && statusMatch && searchMatch && overdueMatch;
+      })
+      .sort((a, b) => {
+        if (filters.sortBy === 'deadlineAsc') {
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return a.deadline - b.deadline;
+        }
+        if (filters.sortBy === 'deadlineDesc') {
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return b.deadline - a.deadline;
+        }
+        const timeA = a.createdAt?.seconds || 0;
+        const timeB = b.createdAt?.seconds || 0;
+        return timeB - timeA;
+      });
+  }, [assignedTasks, filters, searchQuery, currentTime]);
 
   if (loading) return <PageLoader message="Syncing your tasks..." />;
 
@@ -223,7 +227,7 @@ const ProjectPage = () => {
       <Navbar text={"Task"} onSearch={setSearchQuery} />
 
       {/* Main Content Area */}
-      <main className="flex flex-1 p-2 lg:p-10 gap-10">
+      <main className="flex flex-1 p-2 lg:p-6 lg:pt-5 gap-10">
         {/* Left Section (Main Dashboard) */}
         <div className="flex-1 flex flex-col gap-5">
           {/* 2. Hero Header */}
@@ -241,9 +245,28 @@ const ProjectPage = () => {
                 <button
                   onClick={async () => {
                     const inviteLink = `${window.location.origin}/join/${projectid}`;
-                    await navigator.clipboard.writeText(inviteLink);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
+                    
+                    try {
+                      await navigator.clipboard.writeText(inviteLink);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    } catch(e) {
+                      console.log("Clipboard fail");
+                    }
+                    
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: `Join ${projData.projectName} on Arca`,
+                          text: `You have been invited to join ${projData.projectName} on Arca!`,
+                          url: inviteLink
+                        });
+                      } catch (err) {
+                        if (err.name !== "AbortError") console.error("Share failed", err);
+                      }
+                    } else {
+                      window.prompt("Share this link with your team:", inviteLink);
+                    }
                   }}
                   className={`flex items-center self-start gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-all active:scale-95 ${
                     copied
@@ -313,6 +336,17 @@ const ProjectPage = () => {
                     >
                       <BarChart2 size={14} />
                       <span>Analytics</span>
+                    </button>
+                    <button
+                      onClick={() => setView("meetings")}
+                      className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
+                        view === "meetings"
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      }`}
+                    >
+                      <Video size={14} />
+                      <span>Meetings</span>
                     </button>
                   </div>
                 )}
@@ -393,8 +427,14 @@ const ProjectPage = () => {
                   )}
                 </div>
               </div>
-            ) : (
+            ) : view === "analytics" ? (
               <ProjectAnalytics tasks={allProjectTasks} usersMap={usersMap} />
+            ) : (
+              <MeetingsPanel
+                projectId={projectid}
+                projData={projData}
+                userData={userData}
+              />
             )}
           </div>
         </div>
