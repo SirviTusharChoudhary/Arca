@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Video, Clock, Check, Calendar, Trash2 } from "lucide-react";
 import { formatDate, formatCountdown } from "./meetingHelpers";
 
-const MeetingCard = ({ meeting, isAdmin, userData, onDelete, index = 0 }) => {
+const MeetingCard = ({ meeting, isAdmin, onDelete, index = 0 }) => {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const MeetingCard = ({ meeting, isAdmin, userData, onDelete, index = 0 }) => {
   const isLive = now >= start.getTime() && now < end.getTime();
   const isCompleted = now >= end.getTime();
   const countdown = !isLive && !isCompleted ? formatCountdown(meeting.scheduledAt) : null;
-  const canDelete = isAdmin || meeting.createdBy === userData?.uid;
+  const canDelete = isAdmin;
 
   return (
     <motion.div

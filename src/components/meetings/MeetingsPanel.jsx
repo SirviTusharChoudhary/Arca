@@ -154,7 +154,6 @@ const MeetingsPanel = ({ projectId, projData, userData }) => {
               meeting={m}
               index={i}
               isAdmin={isAdmin}
-              userData={userData}
               onDelete={handleDelete}
             />
           ))}

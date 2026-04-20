@@ -312,20 +312,31 @@ const ProjectPage = () => {
                   <span>Filter</span>
                 </button>
 
-                {/* Admin View Switcher */}
-                {projData?.admin === user?.uid && (
-                  <div className="flex bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-md p-0.5">
-                    <button
-                      onClick={() => setView("tasks")}
-                      className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
-                        view === "tasks"
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                      }`}
-                    >
-                      <List size={14} />
-                      <span>Tasks</span>
-                    </button>
+                {/* View Switcher */}
+                <div className="flex bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-md p-0.5">
+                  <button
+                    onClick={() => setView("tasks")}
+                    className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
+                      view === "tasks"
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    }`}
+                  >
+                    <List size={14} />
+                    <span>Tasks</span>
+                  </button>
+                  <button
+                    onClick={() => setView("meetings")}
+                    className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
+                      view === "meetings"
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    }`}
+                  >
+                    <Video size={14} />
+                    <span>Meetings</span>
+                  </button>
+                  {projData?.admin === user?.uid && (
                     <button
                       onClick={() => setView("analytics")}
                       className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
@@ -337,19 +348,8 @@ const ProjectPage = () => {
                       <BarChart2 size={14} />
                       <span>Analytics</span>
                     </button>
-                    <button
-                      onClick={() => setView("meetings")}
-                      className={`flex items-center gap-2 px-3 py-1 text-xs font-bold rounded transition-all ${
-                        view === "meetings"
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                      }`}
-                    >
-                      <Video size={14} />
-                      <span>Meetings</span>
-                    </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
@@ -427,7 +427,7 @@ const ProjectPage = () => {
                   )}
                 </div>
               </div>
-            ) : view === "analytics" ? (
+            ) : view === "analytics" && projData?.admin === user?.uid ? (
               <ProjectAnalytics tasks={allProjectTasks} usersMap={usersMap} />
             ) : (
               <MeetingsPanel
